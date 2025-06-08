@@ -1,5 +1,9 @@
 # IPMI 管理面板
 
+[![Docker Hub](https://img.shields.io/docker/pulls/nemo470/ipmi-dashboard.svg)](https://hub.docker.com/r/nemo470/ipmi-dashboard)
+[![Docker Image Version](https://img.shields.io/docker/v/nemo470/ipmi-dashboard?sort=semver)](https://hub.docker.com/r/nemo470/ipmi-dashboard)
+[![Docker Image Size](https://img.shields.io/docker/image-size/nemo470/ipmi-dashboard/latest)](https://hub.docker.com/r/nemo470/ipmi-dashboard)
+
 一个基于Web的IPMI管理工具，提供直观的图形界面来管理服务器的IPMI功能。
 
 ## 功能特性
@@ -17,6 +21,18 @@
 
 ### 使用Docker运行
 
+#### 方式一：使用Docker Hub镜像（推荐）
+
+1. **直接运行**:
+   ```bash
+   docker run -d -p 8080:5000 -v ./tasks:/app/tasks --name ipmi-dashboard nemo470/ipmi-dashboard:latest
+   ```
+
+2. **访问界面**:
+   打开浏览器访问 `http://localhost:8080`
+
+#### 方式二：本地构建
+
 1. **构建镜像**:
    ```bash
    docker build -t ipmi-dashboard .
@@ -24,13 +40,40 @@
 
 2. **运行容器**:
    ```bash
-   docker run -d -p 8080:5000 --name ipmi-dashboard ipmi-dashboard
+   docker run -d -p 8080:5000 -v ./tasks:/app/tasks --name ipmi-dashboard ipmi-dashboard
    ```
 
 3. **访问界面**:
    打开浏览器访问 `http://localhost:8080`
 
 ### 使用Docker Compose
+
+#### 方式一：使用Docker Hub镜像
+
+创建 `docker-compose.yml` 文件：
+```yaml
+version: '3.8'
+
+services:
+  ipmi-dashboard:
+    image: nemo470/ipmi-dashboard:latest
+    ports:
+      - "8080:5000"
+    restart: unless-stopped
+    container_name: ipmi-dashboard
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./tasks:/app/tasks
+```
+
+然后运行：
+```bash
+docker-compose up -d
+```
+
+#### 方式二：本地构建
 
 1. **启动服务**:
    ```bash
