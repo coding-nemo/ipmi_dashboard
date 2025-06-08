@@ -11,6 +11,7 @@ services:
       - FLASK_ENV=production
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./tasks:/app/tasks
     networks:
       - ipmi-network
 

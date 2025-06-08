@@ -60,9 +60,27 @@
                 <h1 class="text-center mb-4">
                     <i class="fas fa-server"></i> IPMI 管理面板
                 </h1>
+                <!-- 导航标签 -->
+                <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="control-tab" data-bs-toggle="tab" data-bs-target="#control" type="button" role="tab">
+                            <i class="fas fa-cog"></i> 实时控制
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button" role="tab">
+                            <i class="fas fa-clock"></i> 定时任务
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
 
+        <!-- 标签页内容 -->
+        <div class="tab-content" id="mainTabsContent">
+            <!-- 实时控制标签页 -->
+            <div class="tab-pane fade show active" id="control" role="tabpanel">
+        
         <!-- 连接配置 -->
         <div class="row mb-4">
             <div class="col-12">
@@ -198,17 +216,183 @@
                 </div>
             </div>
         </div>
+        
+            </div>
+            <!-- 定时任务标签页 -->
+            <div class="tab-pane fade" id="schedule" role="tabpanel">
+                
+                <!-- 添加任务 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-plus"></i> 添加定时任务
+                            </div>
+                            <div class="card-body">
+                                <form id="task-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">任务名称</label>
+                                                <input type="text" class="form-control" id="task-name" placeholder="可选，如：每日关机">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">操作类型</label>
+                                                <select class="form-select" id="task-action">
+                                                    <option value="on">开机</option>
+                                                    <option value="off">关机</option>
+                                                    <option value="reset">重启</option>
+                                                    <option value="soft">软关机</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">主机地址</label>
+                                                <input type="text" class="form-control" id="task-host" placeholder="192.168.1.100">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">用户名</label>
+                                                <input type="text" class="form-control" id="task-user" placeholder="admin">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">密码</label>
+                                                <input type="password" class="form-control" id="task-password" placeholder="password">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">调度类型</label>
+                                                <select class="form-select" id="schedule-type" onchange="updateScheduleOptions()">
+                                                    <option value="once">执行一次</option>
+                                                    <option value="daily">每天执行</option>
+                                                    <option value="weekly">每周执行</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 一次性执行 -->
+                                    <div class="row" id="once-config">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">执行时间</label>
+                                                <input type="datetime-local" class="form-control" id="once-datetime">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 每日执行 -->
+                                    <div class="row" id="daily-config" style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">执行时间</label>
+                                                <input type="time" class="form-control" id="daily-time">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 每周执行 -->
+                                    <div class="row" id="weekly-config" style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">星期几</label>
+                                                <select class="form-select" id="weekly-day">
+                                                    <option value="0">星期一</option>
+                                                    <option value="1">星期二</option>
+                                                    <option value="2">星期三</option>
+                                                    <option value="3">星期四</option>
+                                                    <option value="4">星期五</option>
+                                                    <option value="5">星期六</option>
+                                                    <option value="6">星期日</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">执行时间</label>
+                                                <input type="time" class="form-control" id="weekly-time">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-success" onclick="addTask()">
+                                            <i class="fas fa-plus"></i> 添加任务
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 任务列表 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-list"></i> 定时任务列表</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshTasks()">
+                                    <i class="fas fa-sync"></i> 刷新
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="tasks-container">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-clock fa-2x mb-2"></i><br>
+                                        暂无定时任务
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 任务文件查看 -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-file-code"></i> 任务文件内容</span>
+                                <button type="button" class="btn btn-sm btn-outline-info" onclick="viewTaskFile()">
+                                    <i class="fas fa-eye"></i> 查看文件
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="task-file-content" class="log-output" style="max-height: 300px;">
+                                    点击上方按钮查看任务文件内容...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
     </div>
 
     <!-- Loading Modal -->
-    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-2 mb-0">执行中...</p>
+                    <p class="mt-2 mb-1">执行中...</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="forceHideLoading()">
+                        取消
+                    </button>
                 </div>
             </div>
         </div>
@@ -218,10 +402,6 @@
     <script>
         let loadingModal;
         
-        document.addEventListener('DOMContentLoaded', function() {
-            loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        });
-
         function getConnectionData() {
             return {
                 host: document.getElementById('ipmi-host').value,
@@ -239,28 +419,72 @@
         }
 
         function showLoading() {
+            if (!loadingModal) {
+                loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            }
             loadingModal.show();
+            // 记录显示时间，用于超时检查
+            document.getElementById('loadingModal')._showTime = Date.now();
         }
 
         function hideLoading() {
-            loadingModal.hide();
+            if (loadingModal) {
+                loadingModal.hide();
+            }
         }
 
-        async function makeRequest(url, data) {
+        function forceHideLoading() {
+            hideLoading();
+            logOperation('用户取消了操作', 'info');
+        }
+
+        // 添加全局错误处理，确保loading状态正确重置
+        window.addEventListener('error', function() {
+            hideLoading();
+        });
+
+        // 确保在页面unload时清理loading状态
+        window.addEventListener('beforeunload', function() {
+            hideLoading();
+        });
+
+        // 添加定时清理机制，防止loading卡住
+        setInterval(function() {
+            if (loadingModal && document.getElementById('loadingModal').classList.contains('show')) {
+                // 如果loading显示超过30秒，自动隐藏
+                const modal = document.getElementById('loadingModal');
+                if (modal._showTime && Date.now() - modal._showTime > 30000) {
+                    console.warn('Loading modal 超时，自动关闭');
+                    hideLoading();
+                }
+            }
+        }, 5000);
+
+        async function makeRequest(url, data, method = 'POST') {
+            showLoading();
             try {
-                showLoading();
-                const response = await fetch(url, {
-                    method: 'POST',
+                const options = {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                return await response.json();
+                    }
+                };
+                
+                if (method === 'POST') {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.json();
+                return result;
             } catch (error) {
+                console.error('Request error:', error);
                 return { success: false, error: '网络请求失败: ' + error.message };
             } finally {
-                hideLoading();
+                // 确保loading状态被清理
+                setTimeout(() => {
+                    hideLoading();
+                }, 100);
             }
         }
 
@@ -412,6 +636,268 @@
                 alert('清除失败: ' + result.error);
             }
         }
+
+        // 定时任务相关函数
+        function updateScheduleOptions() {
+            const scheduleType = document.getElementById('schedule-type').value;
+            const onceConfig = document.getElementById('once-config');
+            const dailyConfig = document.getElementById('daily-config');
+            const weeklyConfig = document.getElementById('weekly-config');
+            
+            // 隐藏所有配置
+            onceConfig.style.display = 'none';
+            dailyConfig.style.display = 'none';
+            weeklyConfig.style.display = 'none';
+            
+            // 显示对应配置
+            if (scheduleType === 'once') {
+                onceConfig.style.display = 'block';
+                // 设置默认时间为1小时后
+                const now = new Date();
+                now.setHours(now.getHours() + 1);
+                document.getElementById('once-datetime').value = now.toISOString().slice(0, 16);
+            } else if (scheduleType === 'daily') {
+                dailyConfig.style.display = 'block';
+            } else if (scheduleType === 'weekly') {
+                weeklyConfig.style.display = 'block';
+            }
+        }
+
+        function copyConnectionInfo() {
+            // 从实时控制标签页复制连接信息到定时任务
+            document.getElementById('task-host').value = document.getElementById('ipmi-host').value;
+            document.getElementById('task-user').value = document.getElementById('ipmi-user').value;
+            document.getElementById('task-password').value = document.getElementById('ipmi-password').value;
+        }
+
+        async function addTask() {
+            const scheduleType = document.getElementById('schedule-type').value;
+            let scheduleConfig = {};
+            
+            // 根据调度类型构建配置
+            if (scheduleType === 'once') {
+                const datetime = document.getElementById('once-datetime').value;
+                if (!datetime) {
+                    alert('请选择执行时间');
+                    return;
+                }
+                scheduleConfig = { datetime: datetime };
+            } else if (scheduleType === 'daily') {
+                const time = document.getElementById('daily-time').value;
+                if (!time) {
+                    alert('请选择执行时间');
+                    return;
+                }
+                scheduleConfig = { time: time };
+            } else if (scheduleType === 'weekly') {
+                const time = document.getElementById('weekly-time').value;
+                const dayOfWeek = document.getElementById('weekly-day').value;
+                if (!time) {
+                    alert('请选择执行时间');
+                    return;
+                }
+                scheduleConfig = { time: time, day_of_week: parseInt(dayOfWeek) };
+            }
+            
+            const data = {
+                name: document.getElementById('task-name').value,
+                host: document.getElementById('task-host').value,
+                user: document.getElementById('task-user').value,
+                password: document.getElementById('task-password').value,
+                action: document.getElementById('task-action').value,
+                schedule_type: scheduleType,
+                schedule_config: scheduleConfig
+            };
+            
+            if (!data.host || !data.user || !data.password) {
+                alert('请填写完整的IPMI连接信息');
+                return;
+            }
+            
+            logOperation('添加定时任务...');
+            
+            try {
+                const result = await makeRequest('/api/tasks', data, 'POST');
+                
+                if (result.success) {
+                    logOperation('定时任务添加成功: ' + result.task_id, 'success');
+                    alert('任务添加成功!');
+                    document.getElementById('task-form').reset();
+                    updateScheduleOptions();
+                    refreshTasks();
+                } else {
+                    logOperation('定时任务添加失败: ' + result.error, 'error');
+                    alert('添加失败: ' + result.error);
+                }
+            } catch (error) {
+                logOperation('定时任务添加失败: ' + error.message, 'error');
+                alert('添加失败: ' + error.message);
+            }
+        }
+
+        async function refreshTasks() {
+            logOperation('刷新任务列表...');
+            try {
+                const result = await makeRequest('/api/tasks', {}, 'GET');
+                
+                if (result.success) {
+                    displayTasks(result.tasks);
+                    logOperation('任务列表刷新成功', 'success');
+                } else {
+                    logOperation('任务列表刷新失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                logOperation('任务列表刷新失败: ' + error.message, 'error');
+            }
+        }
+
+        function displayTasks(tasks) {
+            const container = document.getElementById('tasks-container');
+            
+            if (Object.keys(tasks).length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-clock fa-2x mb-2"></i><br>
+                        暂无定时任务
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (const [taskId, task] of Object.entries(tasks)) {
+                const statusClass = task.status === 'active' ? 'success' : 
+                                   task.status === 'paused' ? 'warning' : 'secondary';
+                const statusText = task.status === 'active' ? '活跃' : 
+                                  task.status === 'paused' ? '暂停' : '已完成';
+                
+                let scheduleText = '';
+                if (task.schedule_type === 'once') {
+                    scheduleText = `一次性执行 - ${new Date(task.schedule_config.datetime).toLocaleString()}`;
+                } else if (task.schedule_type === 'daily') {
+                    scheduleText = `每天 ${task.schedule_config.time}`;
+                } else if (task.schedule_type === 'weekly') {
+                    const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+                    scheduleText = `每周${days[task.schedule_config.day_of_week]} ${task.schedule_config.time}`;
+                }
+                
+                const lastRun = task.last_run ? new Date(task.last_run).toLocaleString() : '未执行';
+                const lastResult = task.last_result ? (task.last_result.success ? '成功' : '失败') : '-';
+                
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="card-title mb-1">
+                                        ${task.name || task.action + ' 任务'}
+                                        <span class="badge bg-${statusClass} ms-2">${statusText}</span>
+                                    </h6>
+                                    <p class="card-text mb-1">
+                                        <strong>服务器:</strong> ${task.host} | 
+                                        <strong>操作:</strong> ${task.action} | 
+                                        <strong>计划:</strong> ${scheduleText}
+                                    </p>
+                                    <small class="text-muted">
+                                        最后执行: ${lastRun} | 结果: ${lastResult} | 执行次数: ${task.run_count}
+                                    </small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-${task.status === 'active' ? 'warning' : 'success'}" 
+                                                onclick="toggleTask('${taskId}')">
+                                            <i class="fas fa-${task.status === 'active' ? 'pause' : 'play'}"></i>
+                                            ${task.status === 'active' ? '暂停' : '启用'}
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="removeTask('${taskId}')">
+                                            <i class="fas fa-trash"></i> 删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        async function toggleTask(taskId) {
+            logOperation('切换任务状态...');
+            const result = await makeRequest(`/api/tasks/${taskId}/toggle`, {}, 'POST');
+            
+            if (result.success) {
+                logOperation('任务状态切换成功', 'success');
+                refreshTasks();
+            } else {
+                logOperation('任务状态切换失败: ' + result.error, 'error');
+                alert('操作失败: ' + result.error);
+            }
+        }
+
+        async function removeTask(taskId) {
+            if (!confirm('确定要删除这个任务吗？')) {
+                return;
+            }
+            
+            logOperation('删除任务...');
+            
+            try {
+                showLoading();
+                const response = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    logOperation('任务删除成功', 'success');
+                    refreshTasks();
+                } else {
+                    logOperation('任务删除失败: ' + data.error, 'error');
+                    alert('删除失败: ' + data.error);
+                }
+            } catch (error) {
+                logOperation('任务删除失败: ' + error.message, 'error');
+                alert('删除失败: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function viewTaskFile() {
+            logOperation('获取任务文件内容...');
+            try {
+                const result = await makeRequest('/api/tasks/file', {}, 'GET');
+                
+                const fileDiv = document.getElementById('task-file-content');
+                if (result.success) {
+                    fileDiv.textContent = result.content;
+                    logOperation('任务文件内容获取成功', 'success');
+                } else {
+                    fileDiv.textContent = '获取失败: ' + result.error;
+                    logOperation('任务文件内容获取失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                logOperation('任务文件内容获取失败: ' + error.message, 'error');
+                document.getElementById('task-file-content').textContent = '获取失败: ' + error.message;
+            }
+        }
+
+
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!loadingModal) {
+                loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            }
+            updateScheduleOptions();
+            
+            // 监听标签页切换
+            document.getElementById('schedule-tab').addEventListener('shown.bs.tab', function() {
+                copyConnectionInfo();
+                refreshTasks();
+            });
+        });
     </script>
 </body>
 </html> 

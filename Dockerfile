@@ -18,8 +18,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用代码
 COPY . .
 
+# 创建任务目录
+RUN mkdir -p /app/tasks
+
 # 暴露端口
 EXPOSE 5000
+
+# 暴露任务目录
+VOLUME ["/app/tasks"]
 
 # 设置环境变量
 ENV FLASK_APP=app.py
