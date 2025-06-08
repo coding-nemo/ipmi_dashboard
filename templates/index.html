@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPMI 管理面板</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .card-header {
+            background-color: #495057;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-power-on {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-power-off {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-power-reset {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+        .status-online {
+            color: #28a745;
+        }
+        .status-offline {
+            color: #dc3545;
+        }
+        .log-output {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">
+                    <i class="fas fa-server"></i> IPMI 管理面板
+                </h1>
+            </div>
+        </div>
+
+        <!-- 连接配置 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-cog"></i> IPMI 连接配置
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="ipmi-host" class="form-label">主机地址</label>
+                                <input type="text" class="form-control" id="ipmi-host" placeholder="192.168.1.100">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="ipmi-user" class="form-label">用户名</label>
+                                <input type="text" class="form-control" id="ipmi-user" placeholder="admin">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="ipmi-password" class="form-label">密码</label>
+                                <input type="password" class="form-control" id="ipmi-password" placeholder="password">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary w-100" onclick="testConnection()">
+                                    <i class="fas fa-plug"></i> 测试连接
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 电源管理 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-power-off"></i> 电源管理
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h5>当前状态: <span id="power-status" class="badge bg-secondary">未知</span></h5>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-power-on text-white" onclick="powerControl('on')">
+                                <i class="fas fa-play"></i> 开机
+                            </button>
+                            <button type="button" class="btn btn-power-off text-white" onclick="powerControl('off')">
+                                <i class="fas fa-stop"></i> 关机
+                            </button>
+                            <button type="button" class="btn btn-power-reset" onclick="powerControl('reset')">
+                                <i class="fas fa-redo"></i> 重启
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="powerControl('soft')">
+                                <i class="fas fa-moon"></i> 软关机
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统信息 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i> 系统信息
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-info mb-3" onclick="getSystemInfo()">
+                            <i class="fas fa-sync"></i> 获取系统信息
+                        </button>
+                        <div id="system-info" class="log-output">
+                            点击上方按钮获取系统信息...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 传感器数据 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-thermometer-half"></i> 传感器数据
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-success mb-3" onclick="getSensors()">
+                            <i class="fas fa-sync"></i> 获取传感器数据
+                        </button>
+                        <div id="sensor-data" class="log-output">
+                            点击上方按钮获取传感器数据...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 事件日志 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-list"></i> 事件日志
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-warning me-2" onclick="getEvents()">
+                                <i class="fas fa-sync"></i> 获取日志
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="clearEvents()">
+                                <i class="fas fa-trash"></i> 清除日志
+                            </button>
+                        </div>
+                        <div id="event-log" class="log-output">
+                            点击上方按钮获取事件日志...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作日志 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-terminal"></i> 操作日志
+                    </div>
+                    <div class="card-body">
+                        <div id="operation-log" class="log-output" style="max-height: 200px;">
+                            等待操作...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 mb-0">执行中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let loadingModal;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        });
+
+        function getConnectionData() {
+            return {
+                host: document.getElementById('ipmi-host').value,
+                user: document.getElementById('ipmi-user').value,
+                password: document.getElementById('ipmi-password').value
+            };
+        }
+
+        function logOperation(message, type = 'info') {
+            const logDiv = document.getElementById('operation-log');
+            const timestamp = new Date().toLocaleString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function showLoading() {
+            loadingModal.show();
+        }
+
+        function hideLoading() {
+            loadingModal.hide();
+        }
+
+        async function makeRequest(url, data) {
+            try {
+                showLoading();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                return await response.json();
+            } catch (error) {
+                return { success: false, error: '网络请求失败: ' + error.message };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function testConnection() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请填写完整的连接信息');
+                return;
+            }
+
+            logOperation('测试IPMI连接...');
+            const result = await makeRequest('/api/power/status', data);
+            
+            if (result.success) {
+                logOperation('连接成功!', 'success');
+                alert('连接成功!');
+                updatePowerStatus(result.output);
+            } else {
+                logOperation('连接失败: ' + result.error, 'error');
+                alert('连接失败: ' + result.error);
+            }
+        }
+
+        function updatePowerStatus(statusText) {
+            const statusElement = document.getElementById('power-status');
+            if (statusText.includes('on')) {
+                statusElement.textContent = '开机';
+                statusElement.className = 'badge bg-success';
+            } else if (statusText.includes('off')) {
+                statusElement.textContent = '关机';
+                statusElement.className = 'badge bg-danger';
+            } else {
+                statusElement.textContent = '未知';
+                statusElement.className = 'badge bg-secondary';
+            }
+        }
+
+        async function powerControl(action) {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请先配置IPMI连接信息');
+                return;
+            }
+
+            data.action = action;
+            logOperation(`执行电源操作: ${action}`);
+            
+            const result = await makeRequest('/api/power/control', data);
+            
+            if (result.success) {
+                logOperation(`电源操作成功: ${result.output}`, 'success');
+                // 延迟获取状态更新
+                setTimeout(() => getPowerStatus(), 2000);
+            } else {
+                logOperation(`电源操作失败: ${result.error}`, 'error');
+                alert('操作失败: ' + result.error);
+            }
+        }
+
+        async function getPowerStatus() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) return;
+
+            const result = await makeRequest('/api/power/status', data);
+            if (result.success) {
+                updatePowerStatus(result.output);
+            }
+        }
+
+        async function getSensors() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请先配置IPMI连接信息');
+                return;
+            }
+
+            logOperation('获取传感器数据...');
+            const result = await makeRequest('/api/sensors', data);
+            
+            const sensorDiv = document.getElementById('sensor-data');
+            if (result.success) {
+                sensorDiv.textContent = result.output;
+                logOperation('传感器数据获取成功', 'success');
+            } else {
+                sensorDiv.textContent = '获取失败: ' + result.error;
+                logOperation('传感器数据获取失败: ' + result.error, 'error');
+            }
+        }
+
+        async function getSystemInfo() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请先配置IPMI连接信息');
+                return;
+            }
+
+            logOperation('获取系统信息...');
+            const result = await makeRequest('/api/system-info', data);
+            
+            const infoDiv = document.getElementById('system-info');
+            if (result.success) {
+                infoDiv.textContent = result.output;
+                logOperation('系统信息获取成功', 'success');
+            } else {
+                infoDiv.textContent = '获取失败: ' + result.error;
+                logOperation('系统信息获取失败: ' + result.error, 'error');
+            }
+        }
+
+        async function getEvents() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请先配置IPMI连接信息');
+                return;
+            }
+
+            logOperation('获取事件日志...');
+            const result = await makeRequest('/api/events', data);
+            
+            const eventDiv = document.getElementById('event-log');
+            if (result.success) {
+                eventDiv.textContent = result.output;
+                logOperation('事件日志获取成功', 'success');
+            } else {
+                eventDiv.textContent = '获取失败: ' + result.error;
+                logOperation('事件日志获取失败: ' + result.error, 'error');
+            }
+        }
+
+        async function clearEvents() {
+            const data = getConnectionData();
+            if (!data.host || !data.user || !data.password) {
+                alert('请先配置IPMI连接信息');
+                return;
+            }
+
+            if (!confirm('确定要清除所有事件日志吗？')) {
+                return;
+            }
+
+            logOperation('清除事件日志...');
+            const result = await makeRequest('/api/events/clear', data);
+            
+            if (result.success) {
+                logOperation('事件日志清除成功', 'success');
+                document.getElementById('event-log').textContent = '日志已清除';
+            } else {
+                logOperation('事件日志清除失败: ' + result.error, 'error');
+                alert('清除失败: ' + result.error);
+            }
+        }
+    </script>
+</body>
+</html> 

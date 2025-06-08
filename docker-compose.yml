@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  ipmi-dashboard:
+    build: .
+    ports:
+      - "8080:5000"
+    restart: unless-stopped
+    container_name: ipmi-dashboard
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - ipmi-network
+
+networks:
+  ipmi-network:
+    driver: bridge 
